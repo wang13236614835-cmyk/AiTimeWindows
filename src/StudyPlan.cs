@@ -67,7 +67,7 @@ namespace AiTime
                 {
                     string[] parts = File.ReadAllText(path, Encoding.UTF8).Trim().Split('|');
                     if (parts.Length == 2 && parts[0] == date.ToString("yyyy-MM-dd")
-                        && parts[1] == "Monday") return DayOfWeek.Monday;
+                        && (parts[1] == "Monday" || parts[1] == "MondayPythonOnly")) return DayOfWeek.Monday;
                 }
             }
             catch (IOException) { }
@@ -111,6 +111,21 @@ namespace AiTime
             ExtensionFor(effectiveDay, out plan.ExtensionTitle, out plan.ExtensionBody, out plan.ExtensionMinutes);
             string dayName = DayName(effectiveDay);
             if (task.Extensions.ContainsKey(dayName)) plan.ExtensionBody = task.Extensions[dayName];
+            // First-day reset: keep the Monday start time, but only teach Python basics.
+            string firstDayOverride = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                "AiTimeWindows", "study-day-override.txt");
+            bool pythonBasicsOnly = false;
+            try { pythonBasicsOnly = plan.LearningDay == 1 && File.Exists(firstDayOverride)
+                && File.ReadAllText(firstDayOverride, Encoding.UTF8).Trim() == date.ToString("yyyy-MM-dd") + "|MondayPythonOnly"; }
+            catch (IOException) { }
+            catch (UnauthorizedAccessException) { }
+            if (pythonBasicsOnly)
+            {
+                plan.ExtensionTitle = "Python 基础巩固（首日）";
+                plan.ExtensionBody = "只完成 Python 的 for 循环、dict.get、split、with open、strip；今天不安排 C、CSV 清洗或 AIDD。";
+                plan.ExtensionMinutes = 15;
+            }
+
 
             if (plan.IsWeekend)
             {
@@ -137,7 +152,7 @@ namespace AiTime
             }
 
             plan.Apps = CoreApps(plan.IsWeekend, effectiveDay);
-            plan.ExtensionApps = ExtensionApps(effectiveDay);
+            plan.ExtensionApps = pythonBasicsOnly ? CoreApps(false, effectiveDay) : ExtensionApps(effectiveDay);
             return plan;
         }
 
