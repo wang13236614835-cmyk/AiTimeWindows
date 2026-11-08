@@ -1,0 +1,39 @@
+# Compiled binaries and generated assets
+bin/
+releases/
+release-staging/
+validation/
+*.exe
+*.dll
+*.pdb
+*.zip
+*.ico
+*.log
+*.tmp
+
+# Workstation snapshots and old source copies
+src.bak-*/
+*SafeBackup*/
+
+# Local state and private learning records
+settings.json
+settings.json.*
+records.json
+records.json.*
+tasks.json
+active-session.json
+study-day-override.txt
+recovery/
+Day??_*/
+*.user
+*.suo
+.vs/
+.idea/
+
+# Never commit credentials
+.env
+.env.*
+*.pem
+*.key
+id_rsa*
+id_ed25519*
